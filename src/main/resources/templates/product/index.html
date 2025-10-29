@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeekStore - Início</title>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-dark: #1a1a1d;
+        --bg-card: #2e2e38;
+        --accent-primary: #6c63ff;
+        --accent-secondary: #00ffc6;
+        --text-light: #f5f5f5;
+        --text-muted: #bfbfbf;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        line-height: 1.5;
+      }
+
+      main {
+        flex: 1; /* Faz o conteúdo principal ocupar o espaço restante */
+      }
+
+      /* NAVBAR */
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: rgba(26, 26, 29, 0.7);
+        backdrop-filter: blur(6px);
+        padding: 0 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+      .logo {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--accent-primary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+      }
+      a {
+        text-decoration: none;
+        color: var(--accent-primary);
+      }
+      .search-bar {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+      }
+      .search-bar input {
+        width: 50%;
+        max-width: 480px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        background: var(--bg-card);
+        color: var(--text-light);
+        font-size: 15px;
+      }
+      .user-menu a {
+        color: var(--text-light);
+        margin-left: 18px;
+        font-weight: 600;
+        transition: color 0.3s;
+      }
+      .user-menu a:hover {
+        color: var(--accent-secondary);
+      }
+
+      /* HERO */
+      .hero-wrap {
+        height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: url("img/hero-bg.jpg") center center / cover no-repeat;
+      }
+      .hero-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        color: var(--text-light);
+        padding: 0 20px;
+      }
+      .hero-content .welcome {
+        font-size: 18px;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .hero-content .title {
+        font-size: clamp(48px, 8vw, 80px);
+        font-weight: 800;
+        color: var(--accent-secondary);
+        margin-bottom: 16px;
+      }
+      .hero-content .subtitle {
+        font-size: clamp(14px, 1.8vw, 18px);
+        color: var(--text-muted);
+        max-width: 700px;
+        margin: 0 auto 28px;
+        line-height: 1.6;
+      }
+      .hero-content .btn-explore {
+        background: linear-gradient(90deg, var(--accent-primary), #5a54e3);
+        color: var(--text-light);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 6px 25px rgba(108, 99, 255, 0.25);
+        transition: all 0.3s ease;
+      }
+      .hero-content .btn-explore:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(108, 99, 255, 0.35);
+      }
+
+      /* PRODUTOS */
+      .products {
+        flex: 1;
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+        padding: 80px 60px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+      .products.revealed {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .product-card {
+        background-color: var(--bg-card);
+        border-radius: 12px;
+        padding: 20px 20px 30px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        width: 23.45%;
+      }
+      .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 0 25px rgba(0, 255, 198, 0.3);
+      }
+      .product-card img {
+        width: 100%;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+      .product-card h3 {
+        color: var(--accent-secondary);
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .product-card p {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .product-card .btn-explore {
+        background: linear-gradient(
+          90deg,
+          var(--accent-primary),
+          var(--accent-secondary)
+        );
+        color: var(--text-light);
+        border: none;
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 6px 20px rgba(108, 99, 255, 0.25);
+        transition: all 0.3s ease;
+      }
+      .product-card .btn-explore:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 255, 198, 0.35);
+      }
+
+      footer {
+        text-align: center;
+        padding: 25px;
+        background-color: var(--bg-card);
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+        header {
+          flex-direction: column;
+          height: auto;
+          padding: 14px 20px;
+          gap: 10px;
+        }
+        .search-bar input {
+          width: 100%;
+        }
+        .hero-content .title {
+          font-size: 48px;
+        }
+        .products {
+          padding: 60px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header>
+      <div class="logo"><a th:href="@{/}">GeekStore</a></div>
+      <div class="search-bar">
+        <input type="text" placeholder="Pesquisar produtos..." />
+      </div>
+      <div class="user-menu">
+        <a th:href="@{/perfil}">Perfil</a>
+        <a th:href="@{/carrinho}">Carrinho</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero-wrap">
+        <div class="hero-content">
+          <p class="welcome">Bem-vindo à</p>
+          <h1 class="title">GeekStore</h1>
+          <p
+            class="subtitle"
+            th:text="'Produtos exclusivos, periféricos e colecionáveis para quem vive o universo geek.'"
+          ></p>
+          <button class="btn-explore" onclick="scrollToProducts()">
+            Explorar agora
+          </button>
+        </div>
+      </section>
+
+      <!-- Produtos -->
+      <section class="products" id="produtos">
+        <div class="product-card" th:each="product : ${products}">
+          <img th:src="@{${product.imageUrl}}" th:alt="${product.name}" />
+          <h3 th:text="${product.name}">Nome do Produto</h3>
+          <p th:text="${product.description}">Descrição do Produto</p>
+          <p>
+            <strong th:text="${#numbers.formatDecimal(product.price,1,2)}"
+              >0,00</strong
+            >
+          </p>
+          <div class="card-actions">
+            <a th:href="@{/products/{id}(id=${product.id})}"
+              ><button class="btn-explore">Ver Detalhes</button></a
+            >
+          </div>
+        </div>
+        <p
+          th:if="${#lists.isEmpty(products)}"
+          style="text-align: center; color: var(--text-muted)"
+        >
+          Nenhum produto disponível.
+        </p>
+      </section>
+    </main>
+
+    <footer>&copy; 2025 GeekStore - Todos os direitos reservados.</footer>
+
+    <script>
+      const produtos = document.getElementById("produtos");
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > window.innerHeight * 0.2)
+          produtos.classList.add("revealed");
+        else produtos.classList.remove("revealed");
+      });
+      function scrollToProducts() {
+        produtos.scrollIntoView({ behavior: "smooth" });
+      }
+    </script>
+  </body>
+</html>

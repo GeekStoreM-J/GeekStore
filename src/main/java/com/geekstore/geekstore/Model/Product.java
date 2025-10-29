@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;    
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -20,6 +20,10 @@ public class Product {
 
     private String imageUrl;
 
+    @Column(length = 500) // Limite de caracteres para a descrição
+    private String description;
+
+    // GETTERS E SETTERS
     public Long getId() {
         return id;
     }
@@ -58,5 +62,13 @@ public class Product {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
