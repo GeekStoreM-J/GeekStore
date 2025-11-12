@@ -30,9 +30,4 @@ public class OrderItemService {
     public void deleteById(Long id) {
         orderItemRepository.deleteById(id);
     }
-
-    // Opcional: buscar todos os itens de um pedido específico
-    public List<OrderItem> findByOrderId(Long orderId) {
-        return orderItemRepository.findByOrderId(orderId);
-    }
 }

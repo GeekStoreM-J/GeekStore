@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Estoque | GeekStore</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #1a1a1d;
+        color: #f5f5f5;
+      }
+
+      .sidebar {
+        width: 240px;
+        background: #2e2e38;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.4);
+      }
+
+      .sidebar .logo {
+        font-size: 26px;
+        font-weight: bold;
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .sidebar nav a {
+        display: block;
+        color: #f5f5f5;
+        text-decoration: none;
+        padding: 12px 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .sidebar nav a:hover,
+      .sidebar nav a.active {
+        background-color: #6c63ff;
+        color: #1a1a1d;
+        font-weight: 600;
+      }
+
+      .logout {
+        text-align: center;
+        font-size: 14px;
+        color: #bfbfbf;
+        cursor: pointer;
+      }
+
+      .logout:hover {
+        color: #ffd500;
+      }
+
+      .main {
+        flex: 1;
+        padding: 40px;
+        position: relative;
+      }
+
+      .main h1 {
+        color: #6c63ff;
+        margin-bottom: 25px;
+        font-size: 32px;
+        text-align: center;
+      }
+
+      .btn-add {
+        display: inline-block;
+        background-color: #00ffc6;
+        color: #1a1a1d;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: background 0.3s, transform 0.1s;
+      }
+
+      .btn-add:hover {
+        background-color: #00e0b0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #2e2e38;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      }
+
+      th,
+      td {
+        padding: 15px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #1a1a1d;
+        color: #00ffc6;
+      }
+
+      tr:nth-child(even) {
+        background-color: #24242a;
+      }
+
+      td img {
+        width: 60px;
+        border-radius: 8px;
+      }
+
+      .actions a {
+        color: #f5f5f5;
+        cursor: pointer;
+        font-size: 18px;
+        margin: 0 8px;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .actions a.edit:hover {
+        color: #ffd500;
+      }
+
+      .actions a.delete:hover {
+        color: #ff4c4c;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal {
+        background: #2e2e38;
+        padding: 40px 30px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        color: #f5f5f5;
+        position: relative;
+      }
+
+      .modal h2 {
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+
+      select,
+      input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #bfbfbf;
+        background: #1a1a1d;
+        color: #f5f5f5;
+      }
+
+      .btn-save {
+        margin-top: 25px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #00ffc6;
+        color: #1a1a1d;
+      }
+
+      .btn-cancel {
+        margin-top: 10px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #ff4c4c;
+        color: #f5f5f5;
+      }
+
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 22px;
+        cursor: pointer;
+        color: #ffd500;
+      }
+
+      .close:hover {
+        color: #ff4c4c;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo">GeekStore Admin</div>
+        <nav>
+          <a th:href="@{/admin/products}">Produtos</a>
+          <a th:href="@{/admin/stocks}" class="active">Estoque</a>
+          <a th:href="@{/admin/users}">Usuários</a>
+          <a th:href="@{/admin/orders}">Pedidos</a>
+        </nav>
+      </div>
+      <div class="logout" th:onclick="'window.location.href=\'/logout\''">
+        Sair
+      </div>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="main">
+      <h1>Controle de Estoque</h1>
+
+      <button class="btn-add" id="openModal">+ Adicionar Estoque</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Imagem</th>
+            <th>Quantidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="stock : ${stocks}">
+            <td th:text="${stock.product.name}">Produto</td>
+            <td>
+              <img
+                th:src="@{/{filename}(filename=${stock.product.imageUrl})}"
+                th:alt="${stock.product.name}"
+              />
+            </td>
+            <td th:text="${stock.quantity}">0</td>
+            <td class="actions">
+              <a
+                href="#"
+                class="edit"
+                th:attr="data-id=${stock.id},data-product=${stock.product.id},data-quantity=${stock.quantity}"
+                >✏️</a
+              >
+              <a
+                th:href="@{/admin/stocks/delete/{id}(id=${stock.id})}"
+                class="delete"
+                >🗑️</a
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <span class="close" id="closeModal">×</span>
+        <h2 id="modalTitle">Adicionar Estoque</h2>
+
+        <form th:action="@{/admin/stocks}" method="post" id="stockForm">
+          <input type="hidden" id="stockId" name="id" />
+
+          <label for="product">Produto</label>
+          <select id="product" name="product.id" required>
+            <option value="">Selecione o produto</option>
+            <option
+              th:each="product : ${products}"
+              th:value="${product.id}"
+              th:text="${product.name}"
+            ></option>
+          </select>
+
+          <label for="quantity">Quantidade</label>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            placeholder="0"
+            min="0"
+            required
+          />
+
+          <button type="submit" class="btn-save">Salvar</button>
+          <button type="button" class="btn-cancel" id="cancelModal">
+            Cancelar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const openBtn = document.getElementById("openModal");
+      const closeBtn = document.getElementById("closeModal");
+      const cancelBtn = document.getElementById("cancelModal");
+      const modal = document.getElementById("modalOverlay");
+      const form = document.getElementById("stockForm");
+      const modalTitle = document.getElementById("modalTitle");
+      const stockId = document.getElementById("stockId");
+      const productSelect = document.getElementById("product");
+      const quantityInput = document.getElementById("quantity");
+      const editButtons = document.querySelectorAll(".edit");
+
+      // Abrir modal Create
+      openBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+        modalTitle.textContent = "Adicionar Estoque";
+        form.action = "/admin/stocks";
+        stockId.value = "";
+        productSelect.value = "";
+        quantityInput.value = "";
+      });
+
+      // Abrir modal Edit
+      editButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modal.style.display = "flex";
+          modalTitle.textContent = "Editar Estoque";
+
+          const id = btn.dataset.id;
+          const product = btn.dataset.product;
+          const quantity = btn.dataset.quantity;
+
+          form.action = `/admin/stocks/edit/${id}`;
+          stockId.value = id;
+          productSelect.value = product;
+          quantityInput.value = quantity;
+        });
+      });
+
+      const closeModal = () => (modal.style.display = "none");
+      closeBtn.addEventListener("click", closeModal);
+      cancelBtn.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+    </script>
+  </body>
+</html>

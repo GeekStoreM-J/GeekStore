@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Pedidos | GeekStore</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #1a1a1d;
+        color: #f5f5f5;
+      }
+
+      .sidebar {
+        width: 240px;
+        background: #2e2e38;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.4);
+      }
+
+      .sidebar .logo {
+        font-size: 26px;
+        font-weight: bold;
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .sidebar nav a {
+        display: block;
+        color: #f5f5f5;
+        text-decoration: none;
+        padding: 12px 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .sidebar nav a:hover,
+      .sidebar nav a.active {
+        background-color: #6c63ff;
+        color: #1a1a1d;
+        font-weight: 600;
+      }
+
+      .logout {
+        text-align: center;
+        font-size: 14px;
+        color: #bfbfbf;
+        cursor: pointer;
+      }
+
+      .logout:hover {
+        color: #ffd500;
+      }
+
+      .main {
+        flex: 1;
+        padding: 40px;
+        position: relative;
+      }
+
+      .main h1 {
+        color: #6c63ff;
+        margin-bottom: 25px;
+        font-size: 32px;
+        text-align: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #2e2e38;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      }
+
+      th,
+      td {
+        padding: 15px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #1a1a1d;
+        color: #00ffc6;
+      }
+
+      tr:nth-child(even) {
+        background-color: #24242a;
+      }
+
+      .actions a {
+        color: #f5f5f5;
+        cursor: pointer;
+        font-size: 18px;
+        margin: 0 8px;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .actions a.edit:hover {
+        color: #ffd500;
+      }
+
+      .actions a.view:hover {
+        color: #00ffc6;
+      }
+
+      .status {
+        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
+      }
+
+      .PENDING {
+        background: #ffd500;
+        color: #1a1a1d;
+      }
+
+      .PAID {
+        background: #00ffc6;
+        color: #1a1a1d;
+      }
+
+      .SHIPPED {
+        background: #6c63ff;
+      }
+
+      .DELIVERED {
+        background: #4caf50;
+      }
+
+      .CANCELLED {
+        background: #ff4c4c;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal {
+        background: #2e2e38;
+        padding: 40px 30px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        color: #f5f5f5;
+        position: relative;
+      }
+
+      .modal h2 {
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+
+      select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #bfbfbf;
+        background: #1a1a1d;
+        color: #f5f5f5;
+      }
+
+      .btn-save {
+        margin-top: 25px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #00ffc6;
+        color: #1a1a1d;
+      }
+
+      .btn-cancel {
+        margin-top: 10px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #ff4c4c;
+        color: #f5f5f5;
+      }
+
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 22px;
+        cursor: pointer;
+        color: #ffd500;
+      }
+
+      .close:hover {
+        color: #ff4c4c;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo">GeekStore Admin</div>
+        <nav>
+          <a th:href="@{/admin/products}">Produtos</a>
+          <a th:href="@{/admin/stocks}">Estoque</a>
+          <a th:href="@{/admin/users}">Usuários</a>
+          <a th:href="@{/admin/orders}" class="active">Pedidos</a>
+        </nav>
+      </div>
+      <div class="logout" th:onclick="'window.location.href=\'/logout\''">
+        Sair
+      </div>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="main">
+      <h1>Gerenciamento de Pedidos</h1>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuário</th>
+            <th>Data</th>
+            <th>Total (R$)</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="order : ${orders}">
+            <td th:text="${order.id}">1</td>
+            <td th:text="${order.user.name}">Usuário</td>
+            <td
+              th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"
+            ></td>
+            <td
+              th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'POINT', 2, 'COMMA')}"
+            ></td>
+            <td>
+              <span
+                th:text="${order.status}"
+                th:class="'status ' + ${order.status}"
+              ></span>
+            </td>
+            <td class="actions">
+              <a
+                href="#"
+                class="edit"
+                th:attr="data-id=${order.id},data-status=${order.status}"
+                >✏️</a
+              >
+              <a th:href="@{'/admin/orders/' + ${order.id}}" class="view">👁️</a>
+            </td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(orders)}">
+            <td colspan="6" style="text-align: center; color: #bfbfbf">
+              Nenhum pedido encontrado.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- Modal Editar Status -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <span class="close" id="closeModal">×</span>
+        <h2>Editar Status do Pedido</h2>
+
+        <form
+          th:action="@{/admin/orders/update-status}"
+          method="post"
+          id="orderForm"
+        >
+          <input type="hidden" id="orderId" name="id" />
+
+          <label for="status">Status</label>
+          <select id="status" name="status" required>
+            <option value="PENDING">Pendente</option>
+            <option value="PAID">Pago</option>
+            <option value="SHIPPED">Enviado</option>
+            <option value="DELIVERED">Entregue</option>
+            <option value="CANCELLED">Cancelado</option>
+          </select>
+
+          <button type="submit" class="btn-save">Salvar</button>
+          <button type="button" class="btn-cancel" id="cancelModal">
+            Cancelar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const modal = document.getElementById("modalOverlay");
+      const closeBtn = document.getElementById("closeModal");
+      const cancelBtn = document.getElementById("cancelModal");
+      const editButtons = document.querySelectorAll(".edit");
+      const orderForm = document.getElementById("orderForm");
+      const orderIdInput = document.getElementById("orderId");
+      const statusSelect = document.getElementById("status");
+
+      // Abrir modal Edit
+      editButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modal.style.display = "flex";
+          const id = btn.dataset.id;
+          const status = btn.dataset.status;
+
+          orderForm.action = `/admin/orders/update-status`;
+          orderIdInput.value = id;
+          statusSelect.value = status;
+        });
+      });
+
+      const closeModal = () => (modal.style.display = "none");
+      closeBtn.addEventListener("click", closeModal);
+      cancelBtn.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Gerenciar Usuários | GeekStore</title>
+
+    <style>
+      /* ====== Estilos gerais ====== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #1a1a1d;
+        color: #f5f5f5;
+      }
+
+      /* ====== Sidebar ====== */
+      .sidebar {
+        width: 240px;
+        background: #2e2e38;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.4);
+      }
+
+      .sidebar .logo {
+        font-size: 26px;
+        font-weight: bold;
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .sidebar nav a {
+        display: block;
+        color: #f5f5f5;
+        text-decoration: none;
+        padding: 12px 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .sidebar nav a:hover,
+      .sidebar nav a.active {
+        background-color: #6c63ff;
+        color: #1a1a1d;
+        font-weight: 600;
+      }
+
+      .logout {
+        text-align: center;
+        font-size: 14px;
+        color: #bfbfbf;
+        cursor: pointer;
+      }
+
+      .logout:hover {
+        color: #ffd500;
+      }
+
+      /* ====== Conteúdo ====== */
+      .main {
+        flex: 1;
+        padding: 40px;
+        position: relative;
+      }
+
+      .main h1 {
+        color: #6c63ff;
+        margin-bottom: 25px;
+        font-size: 32px;
+        text-align: center;
+      }
+
+      .btn-add {
+        display: inline-block;
+        background-color: #00ffc6;
+        color: #1a1a1d;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: background 0.3s, transform 0.1s;
+      }
+
+      .btn-add:hover {
+        background-color: #00e0b0;
+      }
+
+      .btn-add:active {
+        transform: scale(0.98);
+      }
+
+      /* ====== Tabela ====== */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #2e2e38;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      }
+
+      th,
+      td {
+        padding: 15px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #1a1a1d;
+        color: #00ffc6;
+      }
+
+      tr:nth-child(even) {
+        background-color: #24242a;
+      }
+
+      .actions a {
+        color: #f5f5f5;
+        cursor: pointer;
+        font-size: 18px;
+        margin: 0 8px;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .actions a.edit:hover {
+        color: #ffd500;
+      }
+
+      .actions a.delete:hover {
+        color: #ff4c4c;
+      }
+
+      /* ====== Modal ====== */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal {
+        background: #2e2e38;
+        padding: 40px 30px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        color: #f5f5f5;
+        position: relative;
+      }
+
+      .modal h2 {
+        color: #6c63ff;
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #f5f5f5;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #bfbfbf;
+        background: #1a1a1d;
+        color: #f5f5f5;
+        font-size: 16px;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #00ffc6;
+        outline: none;
+        box-shadow: 0 0 8px rgba(0, 255, 198, 0.5);
+      }
+
+      .btn-save {
+        margin-top: 25px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #00ffc6;
+        color: #1a1a1d;
+      }
+
+      .btn-save:hover {
+        background: #00e0b0;
+      }
+
+      .btn-cancel {
+        margin-top: 10px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #ff4c4c;
+        color: #f5f5f5;
+      }
+
+      .btn-cancel:hover {
+        background: #ff1c1c;
+      }
+
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 22px;
+        cursor: pointer;
+        color: #ffd500;
+      }
+
+      .close:hover {
+        color: #ff4c4c;
+      }
+
+      /* ====== Responsivo ====== */
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          flex-direction: row;
+          justify-content: space-around;
+        }
+
+        .main {
+          padding: 20px;
+        }
+
+        table,
+        th,
+        td {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo">GeekStore Admin</div>
+        <nav>
+          <a th:href="@{/admin/products}">Produtos</a>
+          <a th:href="@{/admin/stocks}">Estoque</a>
+          <a th:href="@{/admin/users}" class="active">Usuários</a>
+          <a th:href="@{/admin/orders}">Pedidos</a>
+        </nav>
+      </div>
+      <div class="logout" th:onclick="'window.location.href=\'/logout\''">
+        Sair
+      </div>
+    </aside>
+
+    <!-- Conteúdo principal -->
+    <main class="main">
+      <h1>Gerenciar Usuários</h1>
+
+      <button class="btn-add" id="openModal">+ Adicionar Usuário</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Perfil</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="user : ${users}">
+            <td th:text="${user.name}">Nome</td>
+            <td th:text="${user.email}">email@email.com</td>
+            <td th:text="${user.role}">CLIENTE</td>
+            <td class="actions">
+              <a
+                href="#"
+                class="edit"
+                th:attr="data-id=${user.id},data-name=${user.name},data-email=${user.email},data-role=${user.role}"
+                >✏️</a
+              >
+              <a
+                th:href="@{/admin/users/delete/{id}(id=${user.id})}"
+                class="delete"
+                >🗑️</a
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <span class="close" id="closeModal">×</span>
+        <h2 id="modalTitle">Adicionar Usuário</h2>
+        <form id="userForm" th:action="@{/admin/users}" method="post">
+          <input type="hidden" name="id" id="userId" />
+
+          <label for="name">Nome</label>
+          <input type="text" id="name" name="name" required />
+
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required />
+
+          <label for="password">Senha</label>
+          <input type="password" id="password" name="password" required />
+
+          <label for="role">Perfil</label>
+          <select id="role" name="role" required>
+            <option value="ADMIN">Admin</option>
+            <option value="CLIENTE">Cliente</option>
+          </select>
+
+          <button type="submit" class="btn-save">Salvar Usuário</button>
+          <button type="button" class="btn-cancel" id="cancelModal">
+            Cancelar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const openBtn = document.getElementById("openModal");
+      const closeBtn = document.getElementById("closeModal");
+      const cancelBtn = document.getElementById("cancelModal");
+      const modal = document.getElementById("modalOverlay");
+      const form = document.getElementById("userForm");
+      const modalTitle = document.getElementById("modalTitle");
+      const userId = document.getElementById("userId");
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const roleInput = document.getElementById("role");
+      const editButtons = document.querySelectorAll(".edit");
+
+      // Abrir modal Create
+      openBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+        modalTitle.textContent = "Adicionar Usuário";
+        form.action = "/admin/users";
+        userId.value = "";
+        nameInput.value = "";
+        emailInput.value = "";
+        passwordInput.required = true;
+        passwordInput.value = "";
+        roleInput.value = "CLIENTE";
+      });
+
+      // Abrir modal Edit
+      editButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modal.style.display = "flex";
+          modalTitle.textContent = "Editar Usuário";
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          const email = btn.dataset.email;
+          const role = btn.dataset.role;
+
+          form.action = `/admin/users/edit/${id}`;
+          userId.value = id;
+          nameInput.value = name;
+          emailInput.value = email;
+          passwordInput.required = false; // senha opcional na edição
+          passwordInput.value = "";
+          roleInput.value = role;
+        });
+      });
+
+      // Fechar modal
+      closeBtn.addEventListener("click", () => (modal.style.display = "none"));
+      cancelBtn.addEventListener("click", () => (modal.style.display = "none"));
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
+    </script>
+  </body>
+</html>

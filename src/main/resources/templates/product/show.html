@@ -51,7 +51,7 @@
       /* Container do produto */
       .product-show {
         max-width: 1200px;
-        margin: 60px auto;
+        margin: 80px auto;
         display: flex;
         gap: 40px;
         flex-wrap: wrap;
@@ -127,7 +127,8 @@
         display: block;
       }
 
-      .product-details {
+      .product-details button.add-to-cart {
+        background-color: #00ffc6;
         border: none;
         border-radius: 6px;
         color: #1a1a1d;
@@ -138,7 +139,7 @@
         transition: background 0.3s;
       }
 
-      .product-details {
+      .product-details button.add-to-cart:hover {
         background-color: #00e0b0;
       }
 
@@ -179,47 +180,48 @@
     <header>
       <div class="logo">GeekStore</div>
       <div class="user-menu">
-        <a href="index.html">Voltar</a>
+        <a href="/">Voltar</a>
         <a href="#">Meu Perfil</a>
-        <a href="#">Carrinho 🛒</a>
-        <a href="login.html">Sair</a>
+        <a href="/cart">Carrinho 🛒</a>
+        <a href="/logout">Sair</a>
       </div>
     </header>
 
     <section class="product-show">
       <div class="product-images">
+        <!-- Imagem principal -->
         <img
-          src="https://lojaarenagames.com.br/wp-content/uploads/2022/11/Action-Figure-Goku-Dragon-Ball-Z-Model-A-Solid-Edge-Works-Banpresto-1744617807-990x990.jpg"
-          alt="Action Figure Goku"
+          th:src="@{/{filename}(filename=${product.imageUrl})}"
+          th:alt="${product.name}"
           class="main-img"
           id="mainImage"
         />
 
+        <!-- Miniaturas -->
         <div class="thumbs">
           <img
-            src="https://lojaarenagames.com.br/wp-content/uploads/2022/11/Action-Figure-Goku-Dragon-Ball-Z-Model-A-Solid-Edge-Works-Banpresto-1744617807-990x990.jpg"
-            alt="Goku 1"
+            th:src="@{/{filename}(filename=${product.imageUrl})}"
+            th:alt="${product.name}"
             class="active"
           />
           <img
-            src="https://lojaarenagames.com.br/wp-content/uploads/2022/11/Action-Figure-Goku-Dragon-Ball-Z-Model-A-Solid-Edge-Works-Banpresto-1744617807-990x990.jpg"
-            alt="Goku 2"
+            th:src="@{/{filename}(filename=${product.imageUrl})}"
+            th:alt="${product.name}"
           />
           <img
-            src="https://lojaarenagames.com.br/wp-content/uploads/2022/11/Action-Figure-Goku-Dragon-Ball-Z-Model-A-Solid-Edge-Works-Banpresto-1744617807-990x990.jpg"
-            alt="Goku 3"
+            th:src="@{/{filename}(filename=${product.imageUrl})}"
+            th:alt="${product.name}"
           />
         </div>
       </div>
 
       <div class="product-details">
-        <h1>Action Figure Goku</h1>
-        <p class="description">
-          Figura colecionável de Goku em escala real, com acabamento detalhado e
-          cores vibrantes. Ideal para fãs de Dragon Ball Super que querem
-          adicionar um item premium à sua coleção.
+        <h1 th:text="${product.name}">Nome do Produto</h1>
+        <p class="description" th:text="${product.description}">
+          Descrição do produto
         </p>
-        <span class="price">R$ 199,90</span>
+        <span class="price" th:text="'R$ ' + ${product.price}">R$ 0,00</span>
+        <button class="add-to-cart">Adicionar ao Carrinho</button>
       </div>
     </section>
 
