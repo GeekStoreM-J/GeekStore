@@ -2,6 +2,8 @@ package com.geekstore.geekstore.Controller;
 
 import com.geekstore.geekstore.Model.User;
 import com.geekstore.geekstore.Service.UserService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class AdminUserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminUserController(UserService userService) {
+    public AdminUserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ===== LISTAGEM DE USUÁRIOS =====
@@ -27,7 +31,10 @@ public class AdminUserController {
     @PostMapping
     public String saveUser(@ModelAttribute("user") User user, Model model) {
         try {
-            // Por enquanto, salva a senha sem encoder
+            // Criptografa senha antes de salvar
+            if (user.getPassword() != null && !user.getPassword().isBlank()) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
             userService.save(user);
             return "redirect:/admin/users";
 
@@ -56,7 +63,7 @@ public class AdminUserController {
 
             // 3. Atualiza senha se foi informada
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
-                existingUser.setPassword(updatedUser.getPassword()); // sem encoder
+                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             }
 
             // 4. Salva novamente

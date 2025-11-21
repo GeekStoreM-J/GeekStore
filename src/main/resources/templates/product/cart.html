@@ -16,10 +16,19 @@
         font-family: "Inter", sans-serif;
       }
 
+      html {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
       body {
         background-color: #1a1a1d;
         color: #f5f5f5;
         line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
       }
 
       header {
@@ -51,6 +60,10 @@
 
       nav a:hover {
         color: #00ffc6;
+      }
+
+      main {
+        flex: 1;
       }
 
       .container {
@@ -115,6 +128,9 @@
 
       .item-actions {
         text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
       }
 
       .quantity-input {
@@ -125,20 +141,31 @@
         background-color: #1a1a1d;
         color: #f5f5f5;
         text-align: center;
-        margin-bottom: 6px;
       }
 
-      .remove-btn {
+      .remove-btn,
+      .update-btn {
         background: none;
         border: none;
-        color: #ffd500;
         cursor: pointer;
         font-size: 16px;
         transition: color 0.2s;
       }
 
+      .remove-btn {
+        color: #ffd500;
+      }
+
       .remove-btn:hover {
         color: #ff6666;
+      }
+
+      .update-btn {
+        color: #00ffc6;
+      }
+
+      .update-btn:hover {
+        color: #00e0b0;
       }
 
       .summary {
@@ -211,25 +238,22 @@
         background-color: #2e2e38;
         color: #bfbfbf;
         font-size: 14px;
-        margin-top: 60px;
+        margin-top: auto; /* força o footer ir para o final */
       }
 
       @media (max-width: 900px) {
         .container {
           grid-template-columns: 1fr;
         }
-
         .summary {
           position: static;
           margin-top: 30px;
         }
-
         .item {
           flex-direction: column;
           align-items: flex-start;
           text-align: left;
         }
-
         .item-actions {
           width: 100%;
           display: flex;
@@ -244,7 +268,6 @@
       <div class="logo"><i class="fa-solid fa-gamepad"></i> GeekStore</div>
       <nav>
         <a th:href="@{/products}">Home</a>
-        <a th:href="@{/products}">Produtos</a>
         <a th:href="@{/cart}" style="color: #00ffc6"
           ><i class="fa-solid fa-cart-shopping"></i> Carrinho</a
         >
@@ -252,58 +275,96 @@
       </nav>
     </header>
 
-    <div class="container">
-      <h1>🛒 Meu Carrinho</h1>
+    <main>
+      <div class="container">
+        <h1>🛒 Meu Carrinho</h1>
 
-      <!-- Itens do carrinho -->
-      <div class="cart-items">
-        <div class="item" th:each="item : ${cartItems}">
-          <img
-            th:src="@{/{filename}(filename=${item.product.imageUrl})}"
-            th:alt="${item.product.name}"
-          />
-          <div class="item-info">
-            <h3 th:text="${item.product.name}">Nome do Produto</h3>
-            <p th:text="'R$ ' + ${item.product.price}">R$ 0,00</p>
+        <!-- Itens do carrinho -->
+        <div class="cart-items">
+          <div
+            th:if="${#lists.isEmpty(cartItems)}"
+            style="
+              text-align: center;
+              color: #ffd500;
+              font-size: 18px;
+              padding: 20px;
+            "
+          >
+            🛒 Seu carrinho está vazio!
           </div>
-          <div class="item-actions">
-            <input
-              type="number"
-              class="quantity-input"
-              th:value="${item.quantity}"
-              min="1"
+
+          <div
+            class="item"
+            th:each="item : ${cartItems}"
+            th:unless="${#lists.isEmpty(cartItems)}"
+          >
+            <img
+              th:src="@{/{filename}(filename=${item.product.imageUrl})}"
+              th:alt="${item.product.name}"
             />
-            <form
-              th:action="@{/cart/remove}"
-              method="post"
-              style="display: inline"
-            >
-              <input
-                type="hidden"
-                name="productId"
-                th:value="${item.product.id}"
-              />
-              <button type="submit" class="remove-btn">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </form>
+            <div class="item-info">
+              <h3 th:text="${item.product.name}">Nome do Produto</h3>
+              <p th:text="'R$ ' + ${item.product.price}">R$ 0,00</p>
+            </div>
+            <div class="item-actions">
+              <!-- Atualizar quantidade -->
+              <form
+                th:action="@{/cart/add}"
+                method="post"
+                style="display: flex; gap: 5px; align-items: center"
+              >
+                <input
+                  type="hidden"
+                  name="productId"
+                  th:value="${item.product.id}"
+                />
+                <input
+                  type="number"
+                  name="quantity"
+                  th:value="${item.quantity}"
+                  min="1"
+                  class="quantity-input"
+                />
+                <button
+                  type="submit"
+                  class="update-btn"
+                  title="Atualizar quantidade"
+                >
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+              </form>
+
+              <!-- Remover item -->
+              <form th:action="@{/cart/remove}" method="post">
+                <input
+                  type="hidden"
+                  name="productId"
+                  th:value="${item.product.id}"
+                />
+                <button type="submit" class="remove-btn" title="Remover item">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Resumo -->
-      <div class="summary">
-        <h2>Resumo do Pedido</h2>
-        <p>Subtotal: <span th:text="'R$ ' + ${subtotal}">R$ 0,00</span></p>
-        <p>Frete: <span>Grátis</span></p>
-        <hr style="border: 1px solid #2e2e38; margin: 15px 0" />
-        <p>Total: <span th:text="'R$ ' + ${total}">R$ 0,00</span></p>
+        <!-- Resumo -->
+        <div class="summary">
+          <h2>Resumo do Pedido</h2>
+          <p>Subtotal: <span th:text="'R$ ' + ${subtotal}">R$ 0,00</span></p>
+          <p>Frete: <span>Grátis</span></p>
+          <hr style="border: 1px solid #2e2e38; margin: 15px 0" />
+          <p>Total: <span th:text="'R$ ' + ${total}">R$ 0,00</span></p>
 
-        <form th:action="@{/checkout}" method="get">
-          <button type="submit" class="btn-finalizar">Finalizar Compra</button>
-        </form>
+          <form th:action="@{/cart/checkout}" method="get">
+            <button type="submit" class="btn-finalizar">
+              Finalizar Compra
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </main>
 
     <footer>© 2025 GeekStore — Todos os direitos reservados.</footer>
   </body>

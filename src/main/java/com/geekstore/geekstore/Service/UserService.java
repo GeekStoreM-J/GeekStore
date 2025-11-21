@@ -30,4 +30,19 @@ public class UserService {
     public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
+
+    // Método adicional
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + email));
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    // Dentro do UserService
+    public List<User> findByRole(String role) {
+        return userRepository.findByRole(role);
+    }
 }
